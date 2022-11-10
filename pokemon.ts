@@ -8,8 +8,7 @@ const getPokemon = async (name: string, id: number) => {
     try {
         const response = await axios.get<any>(`https://pokeapi.co/api/v2/pokemon/${name || id}`);
         const pokemon = response.data; 
-        //console.log(`Types: ${pokemon.types.map((type: { type: { name: any; }; }) => type.type.name).join(', ')}`);
-        // log the next pokemon evolution and previous evolution if available with their id
+        // Pokemon info
         console.log(`\n${pokemon.name} : `);
         console.log(` - ID: ${pokemon.id}`);
         console.log(` - Height: ${pokemon.height}`);
@@ -24,7 +23,6 @@ const getPokemon = async (name: string, id: number) => {
             // Another request to get the pokemon evolution chain
             const speciesResponse = await axios.get<any>(pokemon.species.url);
             const species = speciesResponse.data;
-            // Pokemon name + french name
 
             // If it has already evolved
             if (species.evolves_from_species) {
@@ -35,12 +33,15 @@ const getPokemon = async (name: string, id: number) => {
             const evolutionResponse = await axios.get<any>(species.evolution_chain.url);
             const evolution = evolutionResponse.data;
             if (evolution.chain.evolves_to.length > 0) {
+                // If name is the same as the first evolution, it means it has already evolved
                 if(evolution.chain.evolves_to[0].species.name === pokemon.name) {
                     console.log(` - Next evolution: ${evolution.chain.evolves_to[0].evolves_to[0].species.name} (${evolution.chain.evolves_to[0].evolves_to[0].species.url.split('/').slice(-2, -1)})`);
                 }
+                // If name is the same as the second evolution, it means it has already evolved twice
                 else if(evolution.chain.evolves_to[0].evolves_to[0].species.name === pokemon.name) {
                     console.log(` - No more evolution`);
                 }
+                // If name is not the same as the first evolution, it means it has not evolved yet
                 else {
                     console.log(` - Next evolution: ${evolution.chain.evolves_to[0].species.name} (${evolution.chain.evolves_to[0].species.url.split('/').slice(-2, -1)})`);
                 }
